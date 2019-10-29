@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 
-// Redux
-import { connect } from 'react-redux';
 import apiCall from './../../../API/apiCaller';
 import { Link } from 'react-router-dom';
+import { actAddProductsRequest } from './../../../actions/index';
+
+import { connect } from 'react-redux';
 
 class ActionPage extends Component {
   constructor(props) {
@@ -42,10 +43,17 @@ class ActionPage extends Component {
     });
   };
 
-  onSave = event => {
+  onSave = async (event) => {
     event.preventDefault();
     let { id, txtName, txtPrice, chkbStatus } = this.state;
     let { history } = this.props;
+    // Hàm này kiểm tra nếu id = null thì sẽ add thêm 1 product mới
+    let products = {
+      id: id,
+      name: txtName,
+      price: txtPrice,
+      status: chkbStatus,
+    };
     if (id) {
       // update => HTTP method = 'PUT'
       apiCall(`products/${id}`, 'PUT', {
@@ -56,16 +64,13 @@ class ActionPage extends Component {
         history.goBack();
       });
     } else {
-      apiCall('products', 'POST', {
-        name: txtName,
-        price: txtPrice,
-        status: chkbStatus,
-      }).then(res => {
-        history.goBack();
-        // console.log(res);
-      });
-      //Các trường bên trái phải giống các key bên API
-      // console.log(this.state);
+      try {
+        const addProducts = await this.props.onAddProduct(products);
+      } catch (error) {
+        console.log(error)
+      }
+      history.goBack();
+
     }
   };
   render() {
@@ -119,12 +124,21 @@ class ActionPage extends Component {
   }
 }
 
-const mapStateToProps = state => {
+// const mapStateToProps = state => {
+//   return {
+//     products: state.products,
+//   };
+// };
+
+const mapDispatchToProps = (dispatch , props) => {
   return {
-    products: state.products,
+    onAddProduct: products => {
+      dispatch(actAddProductsRequest(products));
+    },
   };
 };
+
 export default connect(
-  mapStateToProps,
-  null
+  null,
+  mapDispatchToProps
 )(ActionPage);

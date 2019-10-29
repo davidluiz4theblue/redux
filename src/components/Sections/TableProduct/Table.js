@@ -3,57 +3,64 @@ import { Link } from 'react-router-dom';
 import ProductList from './ProductList/ProductList';
 import Items from './Items/Items';
 
+// API call
+// import apiCall from './../../../API/apiCaller';
 // Redux
 import { connect } from 'react-redux';
-// API call
-import apiCall from './../../../API/apiCaller';
+import {
+  actFetchProductsRequest,
+  actDeleteProductsRequest,
+} from './../../../actions/index';
 
 class Table extends Component {
+  // constructor(props) {
+  //   super(props);
+  //   this.state = {
+  //     products: [],
+  //   };
+  // }
   constructor(props) {
     super(props);
 
-    this.state = {
-      products: [],
-    };
+    this.state = {};
   }
 
   componentDidMount() {
-    apiCall('products', 'GET', null).then(res => {
-      // console.log(res);
-      this.setState({
-        products: res.data,
-      });
-    });
+    this.props.fetchAllProducts();
   }
+  onDelete = id => {
+    this.props.onDeleteProduct(id);
+  };
+  // componentDidMount() { //Thao tác ko có redux
+  //   apiCall('products', 'GET', null).then(res => {
+  //     // console.log(res);
+  //     this.setState({
+  //       products: res.data,
+  //     });
+  //   });
+  // }
 
   // Hàm xóa
-  onDelete = id => {
-    let { products } = this.state;
-    apiCall(`products/${id}`, 'DELETE', null).then(res => {
-      if (res.status === 200) {
-        let index = this.findIndex(products, id);
-        if (index !== -1) {
-          products.splice(index, 1);
-          this.setState({
-            products: products,
-          });
-        }
-      }
-      // console.log(res);
-    });
-  };
-  findIndex = (products, id) => {
-    let result = -1;
-    products.forEach((product, index) => {
-      if (product.id === id) {
-        result = index;
-      }
-    });
-    return result;
-  };
+  // onDelete = id => {
+  //   let { products } = this.state;
+  //   apiCall(`products/${id}`, 'DELETE', null).then(res => {
+  //     if (res.status === 200) {
+  //       let index = this.findIndex(products, id);
+  //       if (index !== -1) {
+  //         products.splice(index, 1);
+  //         this.setState({
+  //           products: products,
+  //         });
+  //       }
+  //     }
+  //     // console.log(res);
+  //   });
+  // };
 
   render() {
-    let { products } = this.state; // let { products } = this.props;
+    //  <==LẤY TRÊN STATE==>
+    // let { products } = this.state;
+    let { products } = this.props;
 
     return (
       <div className="container mt-4 col-lg-10">
@@ -93,7 +100,20 @@ const mapStateToProps = state => {
     products: state.products,
   };
 };
+
+const mapDispatchToProps = (dispatch, props) => {
+  return {
+    fetchAllProducts: () => {
+      dispatch(actFetchProductsRequest());
+    },
+    onDeleteProduct: id => {
+      dispatch(actDeleteProductsRequest(id));
+    },
+  };
+};
+
 export default connect(
   mapStateToProps,
+  mapDispatchToProps,
   null
 )(Table);
