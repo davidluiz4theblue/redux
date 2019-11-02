@@ -16,6 +16,20 @@ export const actFetchProducts = products => {
     products,
   };
 };
+// ======================== THÊM DỮ LIỆU TỪ API ========================
+export const actAddProductsRequest = products => {
+  return dispatch => {
+    return apiCall('products', 'POST', products).then(res => {
+      dispatch(actAddProducts(res.data));
+    });
+  };
+};
+export const actAddProducts = products => {
+  return {
+    type: Types.ADD_PRODUCTS,
+    products,
+  };
+};
 
 // ======================== XÓA DỮ LIỆU TỪ API ========================
 export const actDeleteProductsRequest = id => {
@@ -31,18 +45,32 @@ export const actDeleteProducts = id => {
     id,
   };
 };
-
-// ======================== THÊM DỮ LIỆU TỪ API ========================
-export const actAddProductsRequest = products => {
+// ======================== ĐƯA DỮ LIỆU LÊN FORM SỬA ========================
+export const actGetProductsRequest = id => {
   return dispatch => {
-    return apiCall('products/content/save', 'POST', products).then(res => {
-      dispatch(actAddProducts(res.data));
+    return apiCall(`products/${id}`, 'GET', null).then(res => {
+      dispatch(actGetProducts(res.data));
     });
   };
 };
-export const actAddProducts = products => {
+
+export const actGetProducts = products => {
   return {
-    type: Types.ADD_PRODUCTS,
+    type: Types.EDIT_PRODUCTS,
+    products,
+  };
+};
+// ======================== ĐƯA DỮ LIỆU TỪ API ========================
+export const actEditProductsRequest = products => {
+  return dispatch => {
+    return apiCall(`products/${products.id}`, 'PUT', products).then(res => {
+      dispatch(actEditProducts(res.data));
+    });
+  };
+};
+export const actEditProducts = products => {
+  return {
+    type: Types.UPDATE_PRODUCTS,
     products,
   };
 };

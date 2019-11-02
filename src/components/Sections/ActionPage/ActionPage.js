@@ -2,8 +2,11 @@ import React, { Component } from 'react';
 
 import apiCall from './../../../API/apiCaller';
 import { Link } from 'react-router-dom';
-import { actAddProductsRequest } from './../../../actions/index';
-
+import {
+  actAddProductsRequest,
+  actGetProductsRequest,
+} from './../../../actions/index';
+//actEditProductsRequest,
 import { connect } from 'react-redux';
 
 class ActionPage extends Component {
@@ -20,6 +23,8 @@ class ActionPage extends Component {
     let { match } = this.props;
     if (match) {
       let id = match.params.id;
+      this.props.onEditProducts(id);
+      // ======================================================
       apiCall(`products/${id}`, 'GET', null).then(res => {
         let data = res.data;
         this.setState({
@@ -28,11 +33,21 @@ class ActionPage extends Component {
           txtPrice: data.price,
           chkbStatus: data.status,
         });
-        // console.log(res.data);
       });
-      // console.log(id);
     }
   }
+  // <============Redux Của Sửa============>
+  // getDerivedStateFromProps(nextProps) {
+  //   if (nextProps && nextProps.itemEditing) {
+  //     let { itemEditing } = nextProps;
+  //     this.setState({
+  //       id: itemEditing.id,
+  //       txtName: itemEditing.name,
+  //       txtPrice: itemEditing.price,
+  //       chkbStatus: itemEditing.status,
+  //     });
+  //   }
+  // }
 
   onChange = event => {
     let target = event.target;
@@ -43,7 +58,7 @@ class ActionPage extends Component {
     });
   };
 
-  onSave = async (event) => {
+  onSave = async event => {
     event.preventDefault();
     let { id, txtName, txtPrice, chkbStatus } = this.state;
     let { history } = this.props;
@@ -55,7 +70,8 @@ class ActionPage extends Component {
       status: chkbStatus,
     };
     if (id) {
-      // update => HTTP method = 'PUT'
+      // ====update => HTTP method = 'PUT' ====
+
       apiCall(`products/${id}`, 'PUT', {
         name: txtName,
         price: txtPrice,
@@ -63,15 +79,17 @@ class ActionPage extends Component {
       }).then(res => {
         history.goBack();
       });
+      // this.props.onUpdateProduct(products);
     } else {
       try {
-        const addProducts = await this.props.onAddProduct(products);
+        const addProducts = await this.props.onAddProducts(products);
+        console.log(addProducts);
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
       history.goBack();
-
     }
+    // history.goBack();
   };
   render() {
     let { txtName, txtPrice, chkbStatus } = this.state;
@@ -130,15 +148,26 @@ class ActionPage extends Component {
 //   };
 // };
 
-const mapDispatchToProps = (dispatch , props) => {
+const mapStateToProps = state => {
   return {
-    onAddProduct: products => {
+    itemEditing: state.itemEditing,
+  };
+};
+const mapDispatchToProps = (dispatch, props) => {
+  return {
+    onAddProducts: products => {
       dispatch(actAddProductsRequest(products));
     },
+    onEditProducts: id => {
+      dispatch(actGetProductsRequest(id));
+    },
+    // onUpdateProduct: products => {
+    //   dispatch(actEditProductsRequest(products));
+    // },
   };
 };
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(ActionPage);

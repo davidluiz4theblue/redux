@@ -61,7 +61,7 @@ class Table extends Component {
     //  <==LẤY TRÊN STATE==>
     // let { products } = this.state;
     let { products } = this.props;
-
+    console.log(products)
     return (
       <div className="container mt-4 col-lg-10">
         <Link to="/product/addproduct">
